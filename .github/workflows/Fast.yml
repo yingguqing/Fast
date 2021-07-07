@@ -27,6 +27,7 @@ jobs:
             
     - name: Run Python Application
       run: 
+        ls
         python Main.py '${{ secrets.EncryptKey  }}'
         
     - name: Commit files
