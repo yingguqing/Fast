@@ -26,9 +26,8 @@ jobs:
          pip install -r requirements.txt
             
     - name: Run Python Application
-      run: 
-        ls
-        python Main.py '${{ secrets.EncryptKey  }}'
+      run:
+        python Main.py ${{ secrets.EncryptKey  }}
         
     - name: Commit files
       run: |
