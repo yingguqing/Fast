@@ -18,7 +18,7 @@ if __name__ != '__main__':
 
 #  视频下载与上传
 def download_upload(video, network, upload, id):
-    #  获取视频的详细数据，主要是获取下载地址
+    # 获取视频的详细数据，主要是获取下载地址
     detailVideo = network.detail(video)
     if detailVideo is None:
         return

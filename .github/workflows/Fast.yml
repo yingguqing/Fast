@@ -27,7 +27,7 @@ jobs:
             
     - name: Run Python Application
       run:
-        python Main.py ${{ secrets.EncryptKey  }}
+        python main.py ${{ secrets.EncryptKey  }}
         
     - name: Commit files
       run: |
