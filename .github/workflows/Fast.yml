@@ -6,7 +6,7 @@ name: Python with Maven
 on: [push]
   #schedule:
     # 定时执行，Runs at 17:00 UTC every day
-    #- cron:  '0 17 * * *'
+    #- cron:  '0 0 * * *'
 
 jobs:
   build:
@@ -15,20 +15,27 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    # 设置python环境
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - name: Install dependencies
+        run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            
     - name: Run Python Application
       run: 
-        python main.py ${{ secrets.EncryptKey  }}
+        python Main.py '${{ secrets.EncryptKey  }}'
         
     - name: Commit files
       run: |
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
-         git add test.log
-         #git add bing-wallpaper.json
+         git add upload_ids.txt
+         git add token.txt
+         git add README.md
          git commit -m "update readme.md"
          
     - name: Push changes
