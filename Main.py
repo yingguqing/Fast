@@ -6,11 +6,11 @@ import json
 import os
 import time
 from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from Common import print_info, MVHISTORYCONT
 from Network import Network
 from Upload import Upload
-from Common import load_mv_ids, save_mv_id
+from Common import load_mv_ids
 
 if __name__ != '__main__':
     sys.exit()
@@ -51,10 +51,12 @@ if len(sys.argv) == 2:
                 id = '{}_{}'.format(video.type, video.mvId)
                 if id in ids:
                     existsCount += 1
+                    print("相同数量:{}".format(existsCount))
                     if existsCount >= existsMaxCount:
                         break
                     else:
                         print_info('{} 已经上传成功'.format(id))
+                        print_info("相同数量:{}".format(existsCount))
                         continue
 
                 with ThreadPoolExecutor(max_workers=5) as executor:
