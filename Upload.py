@@ -110,7 +110,10 @@ class Upload:
         create_post_json = drive.create(parent_folder_id)
         # 如果文件已存在，就不再上传
         if create_post_json.get('exist'):
-            return False
+            print_success('【{filename}】 存在，不需要上传'.format(filename=drive.filename))
+            if self.del_after_finish:
+                os.remove(drive.realpath)
+            return drive.filepath_hash
         if 'rapid_upload' in create_post_json and create_post_json['rapid_upload']:
             print_success('【{filename}】秒传成功！消耗{s}秒'.format(filename=drive.filename, s=time.time() - drive.start_time))
             if self.del_after_finish:

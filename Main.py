@@ -41,7 +41,7 @@ if len(sys.argv) == 2:
 
     for network in [one, two]:
         existsCount = 0
-        while True:
+        while existsCount < existsMaxCount:
             # 获取热门视频列表
             videoList = network.hotList(network.page)
             if videoList is None:
@@ -51,12 +51,11 @@ if len(sys.argv) == 2:
                 id = '{}_{}'.format(video.type, video.mvId)
                 if id in ids:
                     existsCount += 1
-                    print("相同数量:{}".format(existsCount))
                     if existsCount >= existsMaxCount:
+                        print_info('相同数量已达到上限')
                         break
                     else:
-                        print_info('{} 已经上传成功'.format(id))
-                        print_info("相同数量:{}".format(existsCount))
+                        print_info('{} 已经上传成功。相同数量：'.format(id, existsCount))
                         continue
 
                 with ThreadPoolExecutor(max_workers=5) as executor:
