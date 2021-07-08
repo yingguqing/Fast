@@ -24,6 +24,7 @@ MVHISTORYCONT = 0
 # 本次抓取视频需要上传数量
 MVUPLOADCOUNT = 0
 
+
 # 处理路径
 def qualify_path(path):
     if not path:
@@ -150,7 +151,10 @@ def load_mv_ids():
         ids = []
         if os.path.exists(upload_ids_path):
             with open(upload_ids_path, 'rb') as f:
-                ids = f.read().decode('utf-8').split(",")
+                values = f.read().decode('utf-8')
+                values = values.replace('\n', '')
+                values = values.replace(' ', '')
+                ids = values.split(",")
         global MVHISTORYCONT
         MVHISTORYCONT = len(ids)
         return ids

@@ -35,8 +35,12 @@ if len(sys.argv) == 2:
     attOne = NetworkAttributes(allConfig.get('One'), ENCRYPT_ONE)
     # 创建一号网络
     one = Network(attOne)
+    networks = [one]
+
+    # 暂时不抓取二号的视频，后期看情况
     # 创建二号网络
     two = Network(NetworkAttributes(allConfig.get('Two'), ENCRYPT_TWO))
+
     # 创建上传
     upload = Upload(allConfig.get('Aliyun'), attOne)
     # 已下载的视频id
@@ -47,7 +51,7 @@ if len(sys.argv) == 2:
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_list = []
-        for network in [one, two]:
+        for network in networks:
             existsCount = 0
             while existsCount < existsMaxCount:
                 # 获取热门视频列表
