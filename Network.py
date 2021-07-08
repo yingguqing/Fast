@@ -6,7 +6,7 @@ from Video import Video
 import requests
 import json
 from NetworkAttributes import ENCRYPT_ONE, ENCRYPT_TWO
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urljoin, urlencode, urlparse
 from Common import print_info, print_error
 
 
@@ -16,13 +16,17 @@ class Network:
         #  页码
         self.page = 1
         #  最大加载页码数
-        self.maxPage = 5
+        self.maxPage = 15
         #  每页个数
-        self.perPage = 15
+        self.perPage = 4
         self.attributes = attributes
         self.host = attributes.host
         self.type = attributes.type
         if self.type == ENCRYPT_ONE:
+            # 热门数据列表中的下载链接的host
+            self.oldDownloadHost = ''
+            # 获取详细信息后的下载链接的host（替换列表中的链接，减少请求）
+            self.newDownloadHost = ''
             self.maxPage = 10
 
     def post(self, api, params, keyPath=None):
@@ -104,6 +108,12 @@ class Network:
         """ 视频详细数据 """
         if video is None or video.mvId is None:
             return None
+
+        # 第一种类型的视频下载地址有规律，所以只要拿了第一个的详细下载地址，就能提取相应的host进行替换
+        if self.type == ENCRYPT_ONE and len(self.oldDownloadHost) > 0 and len(self.newDownloadHost) > 0:
+            video.downloadURL = video.downloadURL.replace(self.oldDownloadHost, self.newDownloadHost)
+            return video
+
         api = self.attributes.detail_api
         if self.type == ENCRYPT_ONE:
             params = {
@@ -120,12 +130,20 @@ class Network:
         else:
             return None
         jsonValue = self.post(api, params, keyPath)
+
         if jsonValue is None or type(jsonValue) is not dict:
             print_error('{}_{} 下载链接获取失败'.format(video.type, video.mvId))
             return None
 
         video_temp = Video(jsonValue, self.type)
         if video_temp.downloadURL is not None:
+            if self.type == ENCRYPT_ONE:
+                # 提取host和scheme，用于其他视频下载地址的替换
+                parsed = urlparse(video.downloadURL)
+                self.oldDownloadHost = '{probuf.scheme}://{uri.netloc}'.format(uri=parsed, probuf=parsed)
+                parsed = urlparse(video_temp.downloadURL)
+                self.newDownloadHost = '{probuf.scheme}://{uri.netloc}'.format(uri=parsed, probuf=parsed)
+
             video.downloadURL = video_temp.downloadURL
         else:
             video.downloadURL = None

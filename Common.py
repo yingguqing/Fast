@@ -170,7 +170,7 @@ def save_mv_id(mv_id):
         with open(upload_ids_path, 'w') as f:
             f.write(','.join(ids))
             f.flush()
-        
+
         global MVHISTORYCONT
         print_info('{} 上传成功，本次完成数量：{}'.format(mv_id, (len(ids) - MVHISTORYCONT)))
     finally:

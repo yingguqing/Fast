@@ -46,6 +46,8 @@ if len(sys.argv) == 2:
     existsMaxCount = 5
 
     finishCount = 0
+    # 需要上传的文件数
+    uploadCount = 0
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_list = []
         for network in [one, two]:
@@ -63,21 +65,20 @@ if len(sys.argv) == 2:
                         if existsCount >= existsMaxCount:
                             print_info('相同数量已达到上限')
                             break
-                        else:
-                            print_info('{} 已经上传成功。相同数量：{}'.format(id, existsCount))
-                            continue
                     else:
                         print_info('{} 需要上传，提交线程'.format(id))
+                        uploadCount += 1
                         # 提交线程
                         future = executor.submit(download_upload, video, network, upload, id)
                         future_list.append(future)
 
+        print_info('需要处理视频数：{}'.format(uploadCount))
         # 检查线程列表，获取线程状态
         for res in as_completed(future_list):
             if res.result():
                 finishCount += 1
 
-    print_info('线程完成数：{}'.format(finishCount))
+    print_info('视频上传成功数：{}'.format(finishCount))
     # 计算本次更新视频数
     history = MVHISTORYCONT
     load_mv_ids()
