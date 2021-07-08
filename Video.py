@@ -15,6 +15,7 @@ class Video(User):
     def __init__(self, jsonValue, type):
         super().__init__(jsonValue, type)
         self.gold = 0
+        self.retime = 3
         if type == ENCRYPT_ONE:
             self.mvId = str(jsonValue.get("mv_id"))
             self.title = str(jsonValue.get("mv_title")).replace(" ", "")
@@ -78,6 +79,17 @@ class Video(User):
 
         print_info('开始下载：{}_{}'.format(self.type, self.mvId))
         with open(path, 'wb') as f:
-            f.write(res.content)
-            print_info('{}_{} 下载成功'.format(self.type, self.mvId))
-            return name
+            try:
+                f.write(res.content)
+                # 文件小于1M不上传
+                if self.get_FileSize(path) < 1:
+                    return None
+                print_info('{}_{} 下载成功'.format(self.type, self.mvId))
+                return name
+            finally:
+                f.close
+
+    def get_FileSize(self, filePath):
+        fsize = os.path.getsize(filePath)
+        fsize = fsize/float(1024 * 1024)
+        return round(fsize, 2)
