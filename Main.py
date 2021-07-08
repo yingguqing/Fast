@@ -7,7 +7,7 @@ import os
 import time
 from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from Common import print_info, MVHISTORYCONT
+from Common import print_info, MVHISTORYCONT, MVUPLOADCOUNT
 from Network import Network
 from Upload import Upload
 from Common import load_mv_ids
@@ -45,9 +45,6 @@ if len(sys.argv) == 2:
     # 已经上传成功的mvId最大数，超过时就不再抓取
     existsMaxCount = 5
 
-    finishCount = 0
-    # 需要上传的文件数
-    uploadCount = 0
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_list = []
         for network in [one, two]:
@@ -63,22 +60,17 @@ if len(sys.argv) == 2:
                     if id in ids:
                         existsCount += 1
                         if existsCount >= existsMaxCount:
-                            print_info('相同数量已达到上限')
+                            print_info('{}_相同数量已达到上限'.format(network.type))
                             break
                     else:
-                        print_info('{} 需要上传，提交线程'.format(id))
-                        uploadCount += 1
+                        MVUPLOADCOUNT += 1
+                        print_info('需要处理数：{}'.format(MVUPLOADCOUNT))
                         # 提交线程
                         future = executor.submit(download_upload, video, network, upload, id)
                         future_list.append(future)
 
-        print_info('需要处理视频数：{}'.format(uploadCount))
-        # 检查线程列表，获取线程状态
-        for res in as_completed(future_list):
-            if res.result():
-                finishCount += 1
+        print_info('本次抓取需要处理视频数：{}'.format(MVUPLOADCOUNT))
 
-    print_info('视频上传成功数：{}'.format(finishCount))
     # 计算本次更新视频数
     history = MVHISTORYCONT
     load_mv_ids()

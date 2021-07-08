@@ -21,7 +21,8 @@ DATA = {
 }
 # 历史上传视频成功数
 MVHISTORYCONT = 0
-
+# 本次抓取视频需要上传数量
+MVUPLOADCOUNT = 0
 
 # 处理路径
 def qualify_path(path):
@@ -172,7 +173,8 @@ def save_mv_id(mv_id):
             f.flush()
 
         global MVHISTORYCONT
-        print_info('{} 上传成功，本次完成数量：{}'.format(mv_id, (len(ids) - MVHISTORYCONT)))
+        global MVUPLOADCOUNT
+        print_info('{}/{}: {}上传成功.'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, mv_id))
     finally:
         LOCK.release()
 
