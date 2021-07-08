@@ -37,7 +37,7 @@ if len(sys.argv) == 2:
     ids = load_mv_ids()
 
     # 已经上传成功的mvId最大数，超过时就不再抓取
-    existsMaxCount = 15
+    existsMaxCount = 5
 
     for network in [one, two]:
         existsCount = 0

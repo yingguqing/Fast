@@ -65,8 +65,8 @@ class Video(User):
             print_info('{} 文件存在，不用下载'.format(self.mvId))
             return name
 
-        print_info('开始下载：{}'.format(self.mvId))
+        print_info('开始下载：{}_{}'.format(self.type, self.mvId))
         with open(path, 'wb') as f:
             f.write(res.content)
-            print_info('{} 下载成功'.format(self.mvId))
+            print_info('{}_{} 下载成功'.format(self.type, self.mvId))
             return name

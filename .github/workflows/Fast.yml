@@ -3,10 +3,10 @@
 
 name: Python with Maven
 
-on: [push]
-  #schedule:
-    # 定时执行，Runs at 17:00 UTC every day
-    #- cron:  '0 0 * * *'
+on: #[push]
+  schedule:
+    # 定时执行，Runs at 00:00 UTC every day
+    - cron:  '0 00 * * *'
 
 jobs:
   build:
