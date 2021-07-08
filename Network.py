@@ -13,15 +13,17 @@ from Common import print_info, print_error
 class Network:
 
     def __init__(self, attributes):
-        self.attributes = attributes
-        self.host = attributes.host
-        self.type = attributes.type
         #  页码
         self.page = 1
         #  最大加载页码数
-        self.maxPage = 10
+        self.maxPage = 5
         #  每页个数
         self.perPage = 15
+        self.attributes = attributes
+        self.host = attributes.host
+        self.type = attributes.type
+        if self.type == ENCRYPT_ONE:
+            self.maxPage = 10
 
     def post(self, api, params, keyPath=None):
         url = urljoin(self.host, api)
@@ -83,6 +85,7 @@ class Network:
         else:
             return None
         jsonArray = self.post(api, params, keyPath)
+
         if jsonArray is None:
             return None
         #  解析所有视频数据
@@ -122,11 +125,10 @@ class Network:
             return None
 
         video_temp = Video(jsonValue, self.type)
-
         if video_temp.downloadURL is not None:
             video.downloadURL = video_temp.downloadURL
-            print_info('{}_{} 下载链接获取成功'.format(video.type, video.mvId))
         else:
+            video.downloadURL = None
             print_error('{}_{} 下载链接为空'.format(video.type, video.mvId))
 
         return video

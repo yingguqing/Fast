@@ -6,7 +6,7 @@ import json
 import os
 import time
 from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from Common import print_info, MVHISTORYCONT
 from Network import Network
 from Upload import Upload
@@ -24,46 +24,60 @@ def download_upload(video, network, upload, id):
         return
     #  下载视频，返回文件名
     file_name = detailVideo.download()
-    #  启动上传
-    upload.upload(detailVideo.savePath, file_name, id)
+    #  文件名为空，表示下载失败，文件存在时，启动上传
+    if file_name is not None:
+        upload.upload(detailVideo.savePath, file_name, id)
 
 
 if len(sys.argv) == 2:
     allConfig = json.loads(sys.argv[1])
+    # 创建一号网络相关参数
     attOne = NetworkAttributes(allConfig.get('One'), ENCRYPT_ONE)
+    # 创建一号网络
     one = Network(attOne)
-    upload = Upload(allConfig.get('Aliyun'), attOne)
+    # 创建二号网络
     two = Network(NetworkAttributes(allConfig.get('Two'), ENCRYPT_TWO))
+    # 创建上传
+    upload = Upload(allConfig.get('Aliyun'), attOne)
+    # 已下载的视频id
     ids = load_mv_ids()
 
     # 已经上传成功的mvId最大数，超过时就不再抓取
     existsMaxCount = 5
 
-    for network in [one, two]:
-        existsCount = 0
-        while existsCount < existsMaxCount:
-            # 获取热门视频列表
-            videoList = network.hotList(network.page)
-            if videoList is None:
-                break
-            for video in videoList:
-                # 生成固定格式的mvId
-                id = '{}_{}'.format(video.type, video.mvId)
-                if id in ids:
-                    existsCount += 1
-                    if existsCount >= existsMaxCount:
-                        print_info('相同数量已达到上限')
-                        break
+    finishCount = 0
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_list = []
+        for network in [one, two]:
+            existsCount = 0
+            while existsCount < existsMaxCount:
+                # 获取热门视频列表
+                videoList = network.hotList(network.page)
+                if videoList is None:
+                    break
+                for video in videoList:
+                    # 生成固定格式的mvId
+                    id = '{}_{}'.format(video.type, video.mvId)
+                    if id in ids:
+                        existsCount += 1
+                        if existsCount >= existsMaxCount:
+                            print_info('相同数量已达到上限')
+                            break
+                        else:
+                            print_info('{} 已经上传成功。相同数量：{}'.format(id, existsCount))
+                            continue
                     else:
-                        print_info('{} 已经上传成功。相同数量：'.format(id, existsCount))
-                        continue
+                        print_info('{} 需要上传，提交线程'.format(id))
+                        # 提交线程
+                        future = executor.submit(download_upload, video, network, upload, id)
+                        future_list.append(future)
 
-                with ThreadPoolExecutor(max_workers=5) as executor:
-                    future_list = []
-                    # 提交线程
-                    future = executor.submit(download_upload, video, network, upload, id)
-                    future_list.append(future)
+        # 检查线程列表，获取线程状态
+        for res in as_completed(future_list):
+            if res.result():
+                finishCount += 1
 
+    print_info('线程完成数：{}'.format(finishCount))
     # 计算本次更新视频数
     history = MVHISTORYCONT
     load_mv_ids()

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # 视频信息封装
 
+import json
 from NetworkAttributes import ENCRYPT_ONE, ENCRYPT_TWO
 from User import User
 import os
@@ -16,7 +17,7 @@ class Video(User):
         self.gold = 0
         if type == ENCRYPT_ONE:
             self.mvId = str(jsonValue.get("mv_id"))
-            self.title = str(jsonValue.get("mv_title"))
+            self.title = str(jsonValue.get("mv_title")).replace(" ", "")
             self.imgURL = str(jsonValue.get("mv_img_url"))
             self.playURL = str(jsonValue.get("mv_play_url"))
             self.downloadURL = str(jsonValue.get("mv_play_url"))
@@ -27,7 +28,7 @@ class Video(User):
             self.isCollect = str(jsonValue.get("is_collect"))
         elif type == ENCRYPT_TWO:
             self.mvId = str(jsonValue.get("id"))
-            self.title = str(jsonValue.get("title"))
+            self.title = str(jsonValue.get("title")).replace(" ", "")
             self.imgURL = str(jsonValue.get("cover"))
             self.playURL = str(jsonValue.get("normal_url"))
             self.downloadURL = str(jsonValue.get("normal_url"))
@@ -36,6 +37,12 @@ class Video(User):
             self.like = str(jsonValue.get("praise_num"))
             self.isCatAds = False
             self.isCollect = str(jsonValue.get("is_collect"))
+            if 'type' in jsonValue.keys():
+                videoType = int(jsonValue.get('type'))
+                self.isCatAds = videoType == 2
+            else:
+                self.isCatAds = False
+
             if "gold" in jsonValue.keys():
                 self.gold = int(jsonValue.get("gold"))
         else:
@@ -58,11 +65,15 @@ class Video(User):
     def download(self):
         """ 下载视频,返回文件名 """
         url = self.downloadURL
+        if url is None:
+            print_info('{}_{} 下载链接为空'.format(self.type, self.mvId))
+            return None
         res = requests.get(url)
         name = '{}_u:{}v:{}{}'.format(self.title, self.uId, self.mvId, os.path.splitext(url)[-1])
+
         path = os.path.join(self.savePath, name)
         if os.path.exists(path):
-            print_info('{} 文件存在，不用下载'.format(self.mvId))
+            print_info('{}_{} 文件存在，不用下载'.format(self.type, self.mvId))
             return name
 
         print_info('开始下载：{}_{}'.format(self.type, self.mvId))
