@@ -16,7 +16,7 @@ class Network:
         #  页码
         self.page = 1
         #  最大加载页码数
-        self.maxPage = 5
+        self.maxPage = 20
         #  每页个数
         self.perPage = 15
         self.attributes = attributes

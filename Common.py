@@ -11,6 +11,7 @@ import random
 import sys
 import threading
 import time
+from typing import Set
 from xml.dom.minidom import parseString
 
 LOCK = threading.Lock()
@@ -148,13 +149,14 @@ def load_mv_ids():
     LOCK.acquire()
     try:
         upload_ids_path = get_running_path('/upload_ids.txt')
-        ids = []
+        ids = set()
         if os.path.exists(upload_ids_path):
             with open(upload_ids_path, 'rb') as f:
                 values = f.read().decode('utf-8')
                 values = values.replace('\n', '')
                 values = values.replace(' ', '')
-                ids = values.split(",")
+                all = values.split(",")
+                ids = set(all)
         global MVHISTORYCONT
         MVHISTORYCONT = len(ids)
         return ids
@@ -162,25 +164,43 @@ def load_mv_ids():
         LOCK.release()
 
 
-def save_mv_id(mv_id):
-    """ 保存视频id，用于上传成功记录 """
+def save_mv_id(mv_id, type=1):
+    """ 保存视频id，用于上传成功记录,type: 1上传成功，2秒传成功，3已存在 """
     LOCK.acquire()
     try:
         upload_ids_path = get_running_path('/upload_ids.txt')
-        ids = []
+        ids = set()
         if os.path.exists(upload_ids_path):
             with open(upload_ids_path, 'rb') as f:
-                ids = f.read().decode('utf-8').split(",")
-        ids.insert(0, mv_id)
+                values = f.read().decode('utf-8')
+                values = values.replace('\n', '')
+                values = values.replace(' ', '')
+                all = values.split(",")
+                ids = set(all)
+
+        ids.add(mv_id)
         with open(upload_ids_path, 'w') as f:
             f.write(','.join(ids))
             f.flush()
 
         global MVHISTORYCONT
-        global MVUPLOADCOUNT
-        print_info('{}/{}: {}上传成功.'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, mv_id))
+        if type == 1:
+            title = '上传成功。'
+        elif type == 2:
+            title = '秒传成功。'
+        elif type == 3:
+            title = '已存在，不上传。'
+        else:
+            title = '未知。'
+        print_success('{}/{}: {}{}'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, mv_id, title))
     finally:
         LOCK.release()
+
+
+def set_ready_count(count):
+    global MVUPLOADCOUNT
+    MVUPLOADCOUNT = count
+    print_info('需要处理视频数：{}'.format(count))
 
 
 def read_in_chunks(file_object, chunk_size=16 * 1024, total_size=10 * 1024 * 1024):

@@ -60,7 +60,6 @@ class Upload:
         LOCK.acquire()
         try:
             token = DATA['REFRESH_TOKEN']
-            print('token:{}'.format(token))
             encrypt_token = self.attributes.encrypt(token)
             with open(self.token_path, 'w') as f:
                 f.write(encrypt_token)
@@ -71,9 +70,18 @@ class Upload:
     def upload_file(self, path, filepath, mvId):
         """ 上传视频到阿里云盘 """
         drive = AliyunDrive(DATA['DRIVE_ID'], mvId, DATA['ROOT_PATH'], DATA['CHUNK_SIZE'])
-        # 刷新token
-        drive.token_refresh()
-        self.save_token()
+
+        for time in range(0, 3):
+            try:
+                # 刷新token
+                if drive.token_refresh():
+                    self.save_token()
+                    break
+            except Exception as e:
+                print_error('刷新token失败:{}'.format(e))
+                if time == 2:
+                    return False
+
         realpath = os.path.join(path, filepath)
         drive.load_file(filepath, realpath)
         # 创建目录
@@ -110,15 +118,16 @@ class Upload:
         create_post_json = drive.create(parent_folder_id)
         # 如果文件已存在，就不再上传
         if create_post_json.get('exist'):
-            print_success('【{filename}】 存在，不需要上传'.format(filename=drive.filename))
+            print_warn('【{filename}】 存在，不需要上传'.format(filename=drive.filename))
+            save_mv_id(drive.mv_id, 3)
             if self.del_after_finish:
                 os.remove(drive.realpath)
             return drive.filepath_hash
-        if 'rapid_upload' in create_post_json and create_post_json['rapid_upload']:
-            print_success('【{filename}】秒传成功！消耗{s}秒'.format(filename=drive.filename, s=time.time() - drive.start_time))
+        if type(create_post_json) is dict and 'rapid_upload' in create_post_json and create_post_json['rapid_upload']:
+            # print_success('【{filename}】秒传成功！消耗{s}秒'.format(filename=drive.filename, s=time.time() - drive.start_time))
             if self.del_after_finish:
                 os.remove(drive.realpath)
-            save_mv_id(drive.mv_id)
+            save_mv_id(drive.mv_id, 2)
             return drive.filepath_hash
         # 上传
         drive.upload()
@@ -136,14 +145,9 @@ class Upload:
                 if filepath_hash not in DATA['tasks']:
                     DATA['tasks'][filepath_hash] = task_template.copy()
                 DATA['tasks'][filepath_hash]['filepath'] = fileName
-                if DATA['tasks'][filepath_hash]['upload_time'] > 0:
-                    print_warn(os.path.basename(fileName) + ' 已上传，无需重复上传')
-                    save_mv_id(mvId)
-                else:
-                    if DATA['tasks'][filepath_hash]['upload_time'] <= 0:
-                        # 提交线程
-                        future = executor.submit(self.upload_file, path, fileName, mvId)
-                        future_list.append(future)
+                # 提交线程
+                future = executor.submit(self.upload_file, path, fileName, mvId)
+                future_list.append(future)
 
                 for res in as_completed(future_list):
                     if res.result():
@@ -156,13 +160,8 @@ class Upload:
             if filepath_hash not in DATA['tasks']:
                 DATA['tasks'][filepath_hash] = task_template.copy()
             DATA['tasks'][filepath_hash]['filepath'] = fileName
-            if DATA['tasks'][filepath_hash]['upload_time'] > 0:
-                print_warn(os.path.basename(fileName) + ' 已上传，无需重复上传')
-                save_mv_id(mvId)
+            if self.upload_file(path, fileName, mvId):
+                DATA['tasks'][filepath_hash]['upload_time'] = time.time()
+                save_task(DATA['tasks'])
             else:
-                if DATA['tasks'][filepath_hash]['upload_time'] <= 0:
-                    if self.upload_file(path, fileName, mvId):
-                        DATA['tasks'][filepath_hash]['upload_time'] = time.time()
-                        save_task(DATA['tasks'])
-                    else:
-                        print_error(os.path.basename(fileName) + ' 上传失败')
+                print_error(os.path.basename(fileName) + ' 上传失败')

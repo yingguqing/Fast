@@ -18,7 +18,7 @@ class Video(User):
         self.retime = 3
         if type == ENCRYPT_ONE:
             self.mvId = str(jsonValue.get("mv_id"))
-            self.title = str(jsonValue.get("mv_title")).replace(" ", "")
+            self.title = str(jsonValue.get("mv_title")).replace(" ", "").replace('\n', '')
             self.imgURL = str(jsonValue.get("mv_img_url"))
             self.playURL = str(jsonValue.get("mv_play_url"))
             self.downloadURL = str(jsonValue.get("mv_play_url"))
@@ -29,7 +29,7 @@ class Video(User):
             self.isCollect = str(jsonValue.get("is_collect"))
         elif type == ENCRYPT_TWO:
             self.mvId = str(jsonValue.get("id"))
-            self.title = str(jsonValue.get("title")).replace(" ", "")
+            self.title = str(jsonValue.get("title")).replace(" ", "").replace('\n', '')
             self.imgURL = str(jsonValue.get("cover"))
             self.playURL = str(jsonValue.get("normal_url"))
             self.downloadURL = str(jsonValue.get("normal_url"))
@@ -77,14 +77,14 @@ class Video(User):
             print_info('{}_{} 文件存在，不用下载'.format(self.type, self.mvId))
             return name
 
-        print_info('开始下载：{}_{}'.format(self.type, self.mvId))
+        # print_info('开始下载：{}_{}'.format(self.type, self.mvId))
         with open(path, 'wb') as f:
             try:
                 f.write(res.content)
                 # 文件小于1M不上传
                 if self.get_FileSize(path) < 1:
                     return None
-                print_info('{}_{} 下载成功'.format(self.type, self.mvId))
+                # print_info('{}_{} 下载成功'.format(self.type, self.mvId))
                 return name
             finally:
                 f.close
