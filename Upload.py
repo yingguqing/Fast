@@ -8,7 +8,7 @@ from NetworkAttributes import ENCRYPT_ONE, ENCRYPT_TWO
 from hashlib import sha1
 from AliyunDrive import AliyunDrive
 
-from Common import LOCK, DATA, get_running_path, qualify_path, print_error, print_warn, save_task, save_mv_id
+from Common import LOCK, DATA, get_running_path, qualify_path, print_error, print_warn, save_mv_id
 
 task_template = {
         "filepath": None,
@@ -144,6 +144,6 @@ class Upload:
         DATA['tasks'][filepath_hash]['filepath'] = fileName
         if self.upload_file(path, fileName, mvId):
             DATA['tasks'][filepath_hash]['upload_time'] = time.time()
-            save_task(DATA['tasks'])
+            # save_task(DATA['tasks'])
         else:
             print_error(os.path.basename(fileName) + ' 上传失败')

@@ -122,28 +122,6 @@ def get_xml_tag_value(xml_string, tag_name):
     return False
 
 
-def load_task():
-    LOCK.acquire()
-    try:
-        with open(get_running_path('/tasks.json'), 'rb') as f:
-            task = f.read().decode('utf-8')
-            return json.loads(task)
-    except Exception:
-        return {}
-    finally:
-        LOCK.release()
-
-
-def save_task(task):
-    LOCK.acquire()
-    try:
-        with open(get_running_path('/tasks.json'), 'w') as f:
-            f.write(json.dumps(task))
-            f.flush()
-    finally:
-        LOCK.release()
-
-
 def load_mv_ids():
     """ 读取保存视频id """
     LOCK.acquire()

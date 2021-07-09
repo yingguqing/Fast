@@ -193,7 +193,7 @@ class AliyunDrive:
                 DATA['tasks'][self.filepath_hash]['file_id'] = self.file_id
                 DATA['tasks'][self.filepath_hash]['upload_id'] = self.upload_id
                 DATA['tasks'][self.filepath_hash]['chunk_size'] = self.chunk_size
-                Common.save_task(DATA['tasks'])
+                # Common.save_task(DATA['tasks'])
 
             save_mv_id(self.mv_id, self.filename, 1)
             if self.del_after_finish:
