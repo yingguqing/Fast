@@ -94,6 +94,7 @@ if len(sys.argv) >= 2:
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_list = []
+        print_info('正在获取视频列表。。。')
         for network in networks:
             while readyCount <= readyMaxCount:
                 # 获取热门视频列表
@@ -108,7 +109,6 @@ if len(sys.argv) >= 2:
                             break
 
                         readyCount += 1
-                        print_info('需要处理数：{}'.format(readyCount))
                         # 提交线程
                         future = executor.submit(download_upload, video, network, upload, id)
                         future_list.append(future)

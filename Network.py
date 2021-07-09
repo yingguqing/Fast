@@ -102,7 +102,7 @@ class Network:
             if video.isCatAds or video.gold > 0:
                 continue
             videos.append(video)
-        print_info('{} 第{}页: {}条获取成功'.format(self.type, self.page, len(videos)))
+
         self.page += 1
         return videos
 

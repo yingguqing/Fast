@@ -37,7 +37,7 @@ class Upload:
         DATA['DRIVE_ID'] = config.get('DRIVE_ID')
         DATA['CHUNK_SIZE'] = config.get('CHUNK_SIZE')
         # 处理下上传路径，每天创建一个文件夹
-        loc_time = time.strftime("%Y-%m-%d", time.localtime())
+        loc_time = time.strftime("%Y-%m-%d|%H:%M:%S", time.localtime())
         path = os.path.join(config.get('ROOT_PATH'), loc_time)
         DATA['ROOT_PATH'] = qualify_path(path)
         # 启用多线程
