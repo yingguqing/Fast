@@ -44,9 +44,9 @@ class AliyunDrive:
         self.filepath_hash = sha1(filepath.encode('utf-8')).hexdigest()
         self.realpath = realpath
         self.filename = os.path.basename(realpath)
-        print_info('【{filename}】正在校检文件中，耗时与文件大小有关'.format(filename=self.filename))
         self.hash = Common.get_hash(self.realpath)
         self.filesize = os.path.getsize(self.realpath)
+        # print_info('【{filename}】正在校检文件中，耗时与文件大小有关'.format(filename=self.filename, filesize=round(self.filesize/float(1024 * 1024), 2)))
 
         self.part_info_list = []
         for i in range(0, math.ceil(self.filesize / self.chunk_size)):
@@ -58,9 +58,10 @@ class AliyunDrive:
         文件名：{filename}
         hash：{hash}
         文件大小：{filesize}M
+        文件路径：{filepath}
 =================================================
-'''.format(filename=self.filename, hash=self.hash, filesize=round(self.filesize/float(1024 * 1024), 2))
-        print_info(message)
+'''.format(filename=self.filename, hash=self.hash, filesize=round(self.filesize/float(1024 * 1024), 2), filepath=self.realpath)
+        # print_info(message)
 
     def token_refresh(self):
         LOCK.acquire()
