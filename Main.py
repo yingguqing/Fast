@@ -16,7 +16,8 @@ if __name__ != '__main__':
 
 
 # 上传本地视频
-def upload_local_files(upload, ids):
+def upload_local_files(upload):
+    ids = load_mv_ids()
     paths = [get_running_path('/FastVideo/One'), get_running_path('/FastVideo/Two')]
     type = 0
     total_count = 0
@@ -82,7 +83,7 @@ if len(sys.argv) >= 2:
 
     # 三个参数时，上传本地存在的视频
     if len(sys.argv) >= 3:
-        upload_local_files(upload, ids)
+        upload_local_files(upload)
         sys.exit()
 
     # 需要处理视频数
@@ -114,20 +115,5 @@ if len(sys.argv) >= 2:
                 break
         set_ready_count(readyCount)
 
-    # 计算本次更新视频数
-    history = MVHISTORYCONT
-    ids = load_mv_ids()
     # 把本地视频再检查一下，如果存在就不上传
-    upload_local_files(upload, ids)
-    newCount = MVHISTORYCONT - history
-    # 更新ReadMe，记录本次更新视频数量
-    fold = os.path.abspath('.')
-    readMePath = os.path.join(fold, "README.md")
-    with open(readMePath, 'a+') as f:
-        f.seek(0)
-        loc_time = time.strftime("%Y-%m-%d", time.localtime())
-        f.write('\n')
-        f.write(loc_time)
-        f.write('\n')
-        f.write('更新视频数：{}'.format(newCount))
-        f.flush()
+    upload_local_files(upload)

@@ -44,7 +44,6 @@ jobs:
          git config --local user.name "yingguqing"
          git add upload_ids.txt
          git add token.txt
-         git add README.md
          git commit -m "update readme.md"
          
     - name: Push changes
