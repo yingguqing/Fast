@@ -5,11 +5,10 @@
 import os
 import time
 from NetworkAttributes import ENCRYPT_ONE, ENCRYPT_TWO
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import sha1
 from AliyunDrive import AliyunDrive
 
-from Common import LOCK, DATA, print_success, get_running_path, qualify_path, print_error, print_warn, save_task, save_mv_id
+from Common import LOCK, DATA, get_running_path, qualify_path, print_error, print_warn, save_task, save_mv_id
 
 task_template = {
         "filepath": None,
@@ -24,11 +23,9 @@ task_template = {
 
 class Upload:
 
-    def __init__(self, config, attributes, multithreading=True, max_workers=5):
+    def __init__(self, config, attributes):
         #  先读取本地的token，因为本地的token是有刷新过，比配置文件里的新
         self.token_path = get_running_path('/token.txt')
-        self.multithreading = multithreading
-        self.max_workers = max_workers
         if os.path.exists(self.token_path):
             with open(self.token_path, 'rb') as f:
                 token = f.read().decode('utf-8')
@@ -68,7 +65,7 @@ class Upload:
             LOCK.release()
 
     def upload_file(self, path, filepath, mvId):
-        """ 上传视频到阿里云盘 """
+        """ 上传视频到阿里云盘，path：文件所在目录，fileName：文件名，mvId：视频id（格式：type_视频id) """
         drive = AliyunDrive(DATA['DRIVE_ID'], mvId, DATA['ROOT_PATH'], DATA['CHUNK_SIZE'])
 
         for time in range(0, 3):
@@ -119,16 +116,19 @@ class Upload:
         # 如果文件已存在，就不再上传
         if create_post_json.get('exist'):
             print_warn('【{filename}】 存在，不需要上传'.format(filename=drive.filename))
-            save_mv_id(drive.mv_id, 3)
+            save_mv_id(drive.mv_id, drive.filename, 3)
             if self.del_after_finish:
                 os.remove(drive.realpath)
             return drive.filepath_hash
+
+        # 秒传
         if type(create_post_json) is dict and 'rapid_upload' in create_post_json and create_post_json['rapid_upload']:
             # print_success('【{filename}】秒传成功！消耗{s}秒'.format(filename=drive.filename, s=time.time() - drive.start_time))
             if self.del_after_finish:
                 os.remove(drive.realpath)
-            save_mv_id(drive.mv_id, 2)
+            save_mv_id(drive.mv_id, drive.filename, 2)
             return drive.filepath_hash
+
         # 上传
         drive.upload()
         # 提交
@@ -138,30 +138,12 @@ class Upload:
 
     def upload(self, path, fileName, mvId):
         """ 上传文件，path：文件所在目录，fileName：文件名，mvId：视频id（格式：type_视频id) """
-        if self.multithreading:
-            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-                future_list = []
-                filepath_hash = sha1(fileName.encode('utf-8')).hexdigest()
-                if filepath_hash not in DATA['tasks']:
-                    DATA['tasks'][filepath_hash] = task_template.copy()
-                DATA['tasks'][filepath_hash]['filepath'] = fileName
-                # 提交线程
-                future = executor.submit(self.upload_file, path, fileName, mvId)
-                future_list.append(future)
-
-                for res in as_completed(future_list):
-                    if res.result():
-                        DATA['tasks'][res.result()]['upload_time'] = time.time()
-                        save_task(DATA['tasks'])
-                    else:
-                        print_error(os.path.basename(fileName) + ' 上传失败')
+        filepath_hash = sha1(fileName.encode('utf-8')).hexdigest()
+        if filepath_hash not in DATA['tasks']:
+            DATA['tasks'][filepath_hash] = task_template.copy()
+        DATA['tasks'][filepath_hash]['filepath'] = fileName
+        if self.upload_file(path, fileName, mvId):
+            DATA['tasks'][filepath_hash]['upload_time'] = time.time()
+            save_task(DATA['tasks'])
         else:
-            filepath_hash = sha1(fileName.encode('utf-8')).hexdigest()
-            if filepath_hash not in DATA['tasks']:
-                DATA['tasks'][filepath_hash] = task_template.copy()
-            DATA['tasks'][filepath_hash]['filepath'] = fileName
-            if self.upload_file(path, fileName, mvId):
-                DATA['tasks'][filepath_hash]['upload_time'] = time.time()
-                save_task(DATA['tasks'])
-            else:
-                print_error(os.path.basename(fileName) + ' 上传失败')
+            print_error(os.path.basename(fileName) + ' 上传失败')

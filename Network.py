@@ -15,8 +15,6 @@ class Network:
     def __init__(self, attributes):
         #  页码
         self.page = 1
-        #  最大加载页码数
-        self.maxPage = 20
         #  每页个数
         self.perPage = 15
         self.attributes = attributes
@@ -27,7 +25,11 @@ class Network:
             self.oldDownloadHost = ''
             # 获取详细信息后的下载链接的host（替换列表中的链接，减少请求）
             self.newDownloadHost = ''
+            #  最大加载页码数
             self.maxPage = 10
+        else:
+            #  最大加载页码数
+            self.maxPage = 20
 
     def post(self, api, params, keyPath=None):
         url = urljoin(self.host, api)

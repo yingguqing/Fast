@@ -18,10 +18,12 @@ if __name__ != '__main__':
 # 上传本地视频
 def upload_local_files(upload):
     ids = load_mv_ids()
+    # 一共两个目录下有视频
     paths = [get_running_path('/FastVideo/One'), get_running_path('/FastVideo/Two')]
+
     type = 0
     total_count = 0
-    count = 0
+
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_list = []
         for path in paths:
@@ -39,7 +41,6 @@ def upload_local_files(upload):
                     # 提交线程
                     future = executor.submit(upload.upload, path, file, id)
                     future_list.append(future)
-                count += 1
 
         set_ready_count(total_count)
 
@@ -116,4 +117,5 @@ if len(sys.argv) >= 2:
         set_ready_count(readyCount)
 
     # 把本地视频再检查一下，如果存在就不上传
+    print_info('准备处理本地没有上传成功的视频')
     upload_local_files(upload)

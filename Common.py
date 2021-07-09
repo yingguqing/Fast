@@ -164,7 +164,7 @@ def load_mv_ids():
         LOCK.release()
 
 
-def save_mv_id(mv_id, type=1):
+def save_mv_id(mv_id, file_name='', type=1):
     """ 保存视频id，用于上传成功记录,type: 1上传成功，2秒传成功，3已存在 """
     LOCK.acquire()
     try:
@@ -178,6 +178,9 @@ def save_mv_id(mv_id, type=1):
                 all = values.split(",")
                 ids = set(all)
 
+        if mv_id in ids:
+            return
+
         ids.add(mv_id)
         with open(upload_ids_path, 'w') as f:
             f.write(','.join(ids))
@@ -185,14 +188,23 @@ def save_mv_id(mv_id, type=1):
 
         global MVHISTORYCONT
         if type == 1:
-            title = '上传成功。'
+            title = ' 上传成功。'
         elif type == 2:
-            title = '秒传成功。'
+            title = ' 秒传成功。'
         elif type == 3:
-            title = '已存在，不上传。'
+            title = ' 已存在，不上传。'
         else:
-            title = '未知。'
-        print_success('{}/{}: {}{}'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, mv_id, title))
+            type = -2
+            title = ' 未知。'
+
+        if len(file_name) > 0:
+            name = '【%s】' % file_name
+        else:
+            name = mv_id
+
+        message = '{}/{}: {}{}'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, name, title)
+        log(message)
+        print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=type+33))
     finally:
         LOCK.release()
 
