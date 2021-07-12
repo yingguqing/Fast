@@ -9,7 +9,7 @@ from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Network import Network
 from Upload import Upload
-from Common import print_info, print_error, load_mv_ids, set_ready_count, get_running_path, get_all_file_relative, MVHISTORYCONT
+from Common import print_info, print_error, load_mv_ids, set_ready_count, get_running_path, get_all_file_relative, save_count, MVHISTORYCONT
 
 if __name__ != '__main__':
     sys.exit()
@@ -119,3 +119,14 @@ if len(sys.argv) >= 2:
     # 把本地视频再检查一下，如果存在就不上传
     print_info('准备处理本地没有上传成功的视频')
     upload_local_files(upload)
+    fold = os.path.abspath('.')
+    # 保存成功处理的视频数量
+    count = save_count()
+    # 将视频数做为文件名，也上传到阿里云盘
+    if count is not None and count > 0:
+        name = '#视频数：%d.txt' % count
+        path = os.path.join(fold, name)
+        with open(path, 'a+') as f:
+            f.write('\n')
+            f.flush()
+        upload.upload(fold, name, '')

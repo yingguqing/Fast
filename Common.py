@@ -24,6 +24,8 @@ DATA = {
 MVHISTORYCONT = 0
 # 本次抓取视频需要上传数量
 MVUPLOADCOUNT = 0
+# 本次处理成功数
+MVHANDLECOUNT = 0
 
 
 # 处理路径
@@ -144,6 +146,8 @@ def load_mv_ids():
 
 def save_mv_id(mv_id, file_name='', type=1):
     """ 保存视频id，用于上传成功记录,type: 1上传成功，2秒传成功，3已存在 """
+    if mv_id is None or len(mv_id) == 0:
+        return
     LOCK.acquire()
     try:
         upload_ids_path = get_running_path('/upload_ids.txt')
@@ -165,6 +169,7 @@ def save_mv_id(mv_id, file_name='', type=1):
             f.flush()
 
         global MVHISTORYCONT
+        global MVHANDLECOUNT
         if type == 1:
             title = ' 上传成功。'
         elif type == 2:
@@ -180,6 +185,7 @@ def save_mv_id(mv_id, file_name='', type=1):
         else:
             name = mv_id
 
+        MVHANDLECOUNT += 1
         message = '{}/{}: {}{}'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, name, title)
         log(message)
         print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=type+33))
@@ -191,6 +197,24 @@ def set_ready_count(count):
     global MVUPLOADCOUNT
     MVUPLOADCOUNT = count
     print_info('需要处理视频数：{}'.format(count))
+
+
+def save_count():
+    # 更新ReadMe，记录本次更新视频数量
+    fold = os.path.abspath('.')
+    readMePath = os.path.join(fold, "README.md")
+    print_info('成功处理 %d 个视频' % MVHANDLECOUNT)
+    try:
+        with open(readMePath, 'a+') as f:
+            f.seek(0)
+            loc_time = time.strftime("%Y-%m-%d|%H:%M:%S", time.localtime())
+            f.write('\n')
+            f.write(loc_time)
+            f.write('\n')
+            f.write('更新视频数：{}'.format(MVHANDLECOUNT))
+            f.flush()
+    finally:
+        return MVHANDLECOUNT
 
 
 def read_in_chunks(file_object, chunk_size=16 * 1024, total_size=10 * 1024 * 1024):
