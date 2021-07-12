@@ -121,10 +121,10 @@ if len(sys.argv) >= 2:
     upload_local_files(upload)
     fold = os.path.abspath('.')
     # 保存成功处理的视频数量
-    count = save_count()
+    list = save_count()
     # 将视频数做为文件名，也上传到阿里云盘
-    if count is not None and count > 0:
-        name = '#视频数：%d.txt' % count
+    if list is not None and len(list) > 0:
+        name = '\n'.join(list)
         path = os.path.join(fold, name)
         with open(path, 'a+') as f:
             f.write(name)

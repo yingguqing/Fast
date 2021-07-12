@@ -26,6 +26,8 @@ MVCONT = 0
 MVUPLOADCOUNT = 0
 # 本次处理成功数
 MVHANDLECOUNT = 0
+# 视频文件名
+VideoNameList = []
 
 
 # 处理路径
@@ -168,6 +170,7 @@ def save_mv_id(mv_id, file_name='', type=1):
 
         global MVCONT
         global MVHANDLECOUNT
+        global VideoNameList
         if type == 1:
             title = ' 上传成功。'
         elif type == 2:
@@ -183,6 +186,7 @@ def save_mv_id(mv_id, file_name='', type=1):
         else:
             name = mv_id
 
+        VideoNameList.append(name)
         MVHANDLECOUNT += 1
         MVCONT += 1
         message = '{}/{}: {}{}'.format(MVCONT, MVUPLOADCOUNT, name, title)
@@ -215,7 +219,7 @@ def save_count():
             f.write('更新视频数：{}'.format(MVHANDLECOUNT))
             f.flush()
     finally:
-        return MVHANDLECOUNT
+        return VideoNameList
 
 
 def read_in_chunks(file_object, chunk_size=16 * 1024, total_size=10 * 1024 * 1024):
