@@ -70,7 +70,7 @@ class Video(User):
             print_info('{}_{} 下载链接为空'.format(self.type, self.mvId))
             return None
         res = requests.get(url)
-        name = '{}_u:{}v:{}{}'.format(self.title, self.uId, self.mvId, os.path.splitext(url)[-1])
+        name = '{}-{}_u:{}v:{}{}'.format(self.type, self.title, self.uId, self.mvId, os.path.splitext(url)[-1])
 
         path = os.path.join(self.savePath, name)
         if os.path.exists(path):
