@@ -9,7 +9,7 @@ from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Network import Network
 from Upload import Upload
-from Common import print_info, print_error, load_mv_ids, set_ready_count, get_running_path, get_all_file_relative, save_count, MVHISTORYCONT
+from Common import print_info, print_error, load_mv_ids, set_ready_count, get_running_path, get_all_file_relative, save_count
 
 if __name__ != '__main__':
     sys.exit()
@@ -127,6 +127,6 @@ if len(sys.argv) >= 2:
         name = '#视频数：%d.txt' % count
         path = os.path.join(fold, name)
         with open(path, 'a+') as f:
-            f.write('\n')
+            f.write(name)
             f.flush()
         upload.upload(fold, name, '')

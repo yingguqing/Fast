@@ -20,8 +20,8 @@ DATA = {
     'folder_id_dict': {},
     'tasks': {}
 }
-# 历史上传视频成功数
-MVHISTORYCONT = 0
+# 上传视频成功数
+MVCONT = 0
 # 本次抓取视频需要上传数量
 MVUPLOADCOUNT = 0
 # 本次处理成功数
@@ -137,8 +137,6 @@ def load_mv_ids():
                 values = values.replace(' ', '')
                 all = values.split(",")
                 ids = set(all)
-        global MVHISTORYCONT
-        MVHISTORYCONT = len(ids)
         return ids
     finally:
         LOCK.release()
@@ -168,7 +166,7 @@ def save_mv_id(mv_id, file_name='', type=1):
             f.write(','.join(ids))
             f.flush()
 
-        global MVHISTORYCONT
+        global MVCONT
         global MVHANDLECOUNT
         if type == 1:
             title = ' 上传成功。'
@@ -186,7 +184,8 @@ def save_mv_id(mv_id, file_name='', type=1):
             name = mv_id
 
         MVHANDLECOUNT += 1
-        message = '{}/{}: {}{}'.format((len(ids) - MVHISTORYCONT), MVUPLOADCOUNT, name, title)
+        MVCONT += 1
+        message = '{}/{}: {}{}'.format(MVCONT, MVUPLOADCOUNT, name, title)
         log(message)
         print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=type+33))
     finally:
@@ -196,6 +195,8 @@ def save_mv_id(mv_id, file_name='', type=1):
 def set_ready_count(count):
     global MVUPLOADCOUNT
     MVUPLOADCOUNT = count
+    global MVCONT
+    MVCONT = 0
     print_info('需要处理视频数：{}'.format(count))
 
 
