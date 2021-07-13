@@ -126,7 +126,7 @@ if len(sys.argv) >= 2:
     if list is not None and len(list) > 0:
         name = '\n'.join(list)
         path = os.path.join(fold, name)
-        with open(path, 'a+') as f:
+        with open(path, 'w') as f:
             f.write(name)
             f.flush()
         upload.upload(fold, name, '')
