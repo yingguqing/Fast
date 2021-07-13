@@ -69,7 +69,6 @@ class Video(User):
         if url is None:
             print_info('{}_{} 下载链接为空'.format(self.type, self.mvId))
             return None
-        res = requests.get(url)
         name = '{}-{}_u:{}v:{}{}'.format(self.type, self.title, self.uId, self.mvId, os.path.splitext(url)[-1])
 
         path = os.path.join(self.savePath, name)
@@ -77,6 +76,10 @@ class Video(User):
             print_info('{}_{} 文件存在，不用下载'.format(self.type, self.mvId))
             return name
 
+        res = requests.get(url)
+        # 获取文件大小
+        # file_size_str = res.headers['Content-Length']
+        # file_size = float(file_size_str)/1024/1024
         # print_info('开始下载：{}_{}'.format(self.type, self.mvId))
         with open(path, 'wb') as f:
             try:

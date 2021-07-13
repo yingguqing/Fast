@@ -11,6 +11,9 @@ from Network import Network
 from Upload import Upload
 from Common import print_info, print_error, load_mv_ids, set_ready_count, get_running_path, get_all_file_relative, save_count
 
+# 最大线程数
+MAXWORKERS = 10
+
 if __name__ != '__main__':
     sys.exit()
 
@@ -24,7 +27,7 @@ def upload_local_files(upload):
     type = 0
     total_count = 0
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAXWORKERS) as executor:
         future_list = []
         for path in paths:
             type += 1
@@ -42,7 +45,7 @@ def upload_local_files(upload):
                     future = executor.submit(upload.upload, path, file, id)
                     future_list.append(future)
 
-        set_ready_count(total_count)
+        set_ready_count(total_count, True)
 
         for res in as_completed(future_list):
             if res.result():
@@ -92,11 +95,11 @@ if len(sys.argv) >= 2:
     # 最大处理视频数
     readyMaxCount = 400
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAXWORKERS) as executor:
         future_list = []
         print_info('正在获取视频列表。。。')
         for network in networks:
-            while readyCount <= readyMaxCount:
+            while readyCount < readyMaxCount:
                 # 获取热门视频列表
                 videoList = network.hotList(network.page)
                 if videoList is None:
@@ -105,14 +108,14 @@ if len(sys.argv) >= 2:
                     # 生成固定格式的mvId
                     id = '{}_{}'.format(video.type, video.mvId)
                     if id not in ids:
-                        if readyCount > readyMaxCount:
+                        if readyCount >= readyMaxCount:
                             break
 
                         readyCount += 1
                         # 提交线程
                         future = executor.submit(download_upload, video, network, upload, id)
                         future_list.append(future)
-            if readyCount > readyMaxCount:
+            if readyCount >= readyMaxCount:
                 break
         set_ready_count(readyCount)
 
@@ -124,9 +127,10 @@ if len(sys.argv) >= 2:
     list = save_count()
     # 将视频数做为文件名，也上传到阿里云盘
     if list is not None and len(list) > 0:
-        name = '\n'.join(list)
+        name = '0-视频数：%d.txt' % len(list)
+        print_info(name)
         path = os.path.join(fold, name)
         with open(path, 'w') as f:
-            f.write(name)
+            f.write('\n'.join(list))
             f.flush()
         upload.upload(fold, name, '')

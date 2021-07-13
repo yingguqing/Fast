@@ -196,11 +196,12 @@ def save_mv_id(mv_id, file_name='', type=1):
         LOCK.release()
 
 
-def set_ready_count(count):
+def set_ready_count(count, isClearCount=False):
     global MVUPLOADCOUNT
     MVUPLOADCOUNT = count
-    global MVCONT
-    MVCONT = 0
+    if isClearCount:
+        global MVCONT
+        MVCONT = 0
     print_info('需要处理视频数：{}'.format(count))
 
 
