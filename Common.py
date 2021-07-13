@@ -214,9 +214,9 @@ def save_count():
         with open(readMePath, 'a+') as f:
             f.seek(0)
             loc_time = time.strftime("%Y-%m-%d|%H:%M:%S", time.localtime())
-            f.write('\n')
+            f.write('  ')
             f.write(loc_time)
-            f.write('\n')
+            f.write('  ')
             f.write('更新视频数：{}'.format(MVHANDLECOUNT))
             f.flush()
     finally:
