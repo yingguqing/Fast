@@ -27,7 +27,8 @@ MVUPLOADCOUNT = 0
 # 本次处理成功数
 MVHANDLECOUNT = 0
 # 视频文件名
-VideoNameList = []
+OneVideoNameList = []
+TwoVideoNameList = []
 
 
 # 处理路径
@@ -170,7 +171,8 @@ def save_mv_id(mv_id, file_name='', type=1):
 
         global MVCONT
         global MVHANDLECOUNT
-        global VideoNameList
+        global OneVideoNameList
+        global TwoVideoNameList
         if type == 1:
             title = ' 上传成功。'
         elif type == 2:
@@ -183,10 +185,13 @@ def save_mv_id(mv_id, file_name='', type=1):
 
         if len(file_name) > 0:
             name = '【%s】' % file_name
+            if file_name.startswith("1-"):
+                OneVideoNameList.append(file_name)
+            elif file_name.startswith("2-"):
+                TwoVideoNameList.append(file_name)
         else:
             name = mv_id
 
-        VideoNameList.append(name)
         MVHANDLECOUNT += 1
         MVCONT += 1
         message = '{}/{}: {}{}'.format(MVCONT, MVUPLOADCOUNT, name, title)
@@ -210,17 +215,14 @@ def save_count():
     fold = os.path.abspath('.')
     readMePath = os.path.join(fold, "README.md")
     print_info('成功处理 %d 个视频' % MVHANDLECOUNT)
-    try:
-        with open(readMePath, 'a+') as f:
-            f.seek(0)
-            loc_time = time.strftime("%Y-%m-%d|%H:%M:%S", time.localtime())
-            f.write('  ')
-            f.write(loc_time)
-            f.write('  ')
-            f.write('更新视频数：{}'.format(MVHANDLECOUNT))
-            f.flush()
-    finally:
-        return VideoNameList
+    with open(readMePath, 'a+') as f:
+        f.seek(0)
+        f.write('  \n')
+        loc_time = time.strftime("%Y-%m-%d|%H:%M:%S", time.localtime())
+        f.write(loc_time)
+        f.write('  \n')
+        f.write('更新视频数：{}'.format(MVHANDLECOUNT))
+        f.flush()
 
 
 def read_in_chunks(file_object, chunk_size=16 * 1024, total_size=10 * 1024 * 1024):
