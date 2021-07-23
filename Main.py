@@ -4,7 +4,6 @@
 import sys
 import json
 import os
-import time
 from NetworkAttributes import NetworkAttributes, ENCRYPT_ONE, ENCRYPT_TWO
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Network import Network
