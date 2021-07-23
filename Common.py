@@ -14,6 +14,7 @@ import time
 from typing import Set
 from xml.dom.minidom import parseString
 
+isPrint = False
 LOCK = threading.Lock()
 DATA = {
     'config': {},
@@ -86,12 +87,14 @@ def get_all_file_relative(path):
 def print_info(message):
     i = random.randint(34, 37)
     log(message)
-    print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=i))
+    if isPrint:
+        print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=i))
 
 
 def print_warn(message):
     log(message)
-    print('\033[7;30;33m{message}\033[0m'.format(message=message))
+    if isPrint:
+        print('\033[7;30;33m{message}\033[0m'.format(message=message))
 
 
 def print_error(message):
@@ -101,7 +104,8 @@ def print_error(message):
 
 def print_success(message):
     log(message)
-    print('\033[7;30;32m{message}\033[0m'.format(message=message))
+    if isPrint:
+        print('\033[7;30;32m{message}\033[0m'.format(message=message))
 
 
 def date(timestamp):
@@ -196,7 +200,8 @@ def save_mv_id(mv_id, file_name='', type=1):
         MVCONT += 1
         message = '{}/{}: {}{}'.format(MVCONT, MVUPLOADCOUNT, name, title)
         log(message)
-        print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=type+33))
+        if isPrint:
+            print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=type+33))
     finally:
         LOCK.release()
 
