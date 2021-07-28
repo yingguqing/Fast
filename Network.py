@@ -20,6 +20,9 @@ class Network:
         self.attributes = attributes
         self.host = attributes.host
         self.type = attributes.type
+        requests.adapters.DEFAULT_RETRIES = 5 # 增加重连次数
+        self.session = requests.session()
+        self.session.keep_alive = False  # 关闭多余连接
         if self.type == ENCRYPT_ONE:
             # 热门数据列表中的下载链接的host
             self.oldDownloadHost = ''
@@ -43,7 +46,7 @@ class Network:
         except AttributeError:
             pass
 
-        res = requests.post(url=url, data=paramsString, headers=headers, verify=False)
+        res = self.session.post(url=url, data=paramsString, headers=headers)
         d = self.attributes.decrypt(res.text)
         jsonValue = json.loads(d)
 
