@@ -7,7 +7,7 @@ import requests
 import json
 from NetworkAttributes import ENCRYPT_ONE, ENCRYPT_TWO
 from urllib.parse import urljoin, urlencode, urlparse
-from Common import print_info, print_error
+from Common import print_error
 
 
 class Network:

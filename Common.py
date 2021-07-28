@@ -230,6 +230,14 @@ def save_count():
         f.flush()
 
 
+# 保存文件
+def save_file(name, text):
+    path = get_running_path(name)
+    with open(path, 'a+') as f:
+        f.write(text)
+        f.flush()
+
+
 def read_in_chunks(file_object, chunk_size=16 * 1024, total_size=10 * 1024 * 1024):
     load_size = 0
     while True:
