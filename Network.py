@@ -35,7 +35,15 @@ class Network:
         url = urljoin(self.host, api)
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
         paramsString = urlencode(self.attributes.postParams(params))
-        res = requests.post(url=url, data=paramsString, headers=headers)
+
+        requests.packages.urllib3.disable_warnings()
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+        try:
+            requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
+        except AttributeError:
+            pass
+
+        res = requests.post(url=url, data=paramsString, headers=headers, verify=False)
         d = self.attributes.decrypt(res.text)
         jsonValue = json.loads(d)
 
